@@ -2,6 +2,7 @@ import configparser
 import os
 import shutil
 import datetime
+import secrets
 import time
 
 import tkinter as tk
@@ -9,6 +10,10 @@ from tkinter import filedialog
 
 save_path = ""
 current_character = ""
+
+def generate_random_string():
+    random_hex = ''.join(secrets.choice('0123456789abcdef') for _ in range(16))
+    return random_hex
 
 def get_file_timestamp(filename):
     global current_character
@@ -240,6 +245,8 @@ def auto_save():
     num_saves = len(save_list)
     num_saves = str(num_saves)
     save_name = "BackupSave"+num_saves
+    random_string = "_"+generate_random_string()
+    save_name = save_name + random_string
     os.mkdir("Characters/"+current_character+"/"+save_name)
 
     user_input= input("\n\tDo you want to back up your current save? [Y/N]: ")
@@ -274,17 +281,18 @@ def save_game():
     num_saves = len(save_list)
     num_saves = str(num_saves)
     save_name = "Save"+num_saves
-
+    random_string = "_"+generate_random_string()
+    save_name = save_name + random_string
     if (user_input == "Y" or user_input == "y"):
         while (True):
             user_input = input("\n\tEnter a name for your save: ")
 
-            if (os.path.exists("Characters/"+current_character+"/"+user_input) == False):
-                save_name = user_input
+            if (os.path.exists("Characters/"+current_character+"/"+user_input+random_string) == False):
+                save_name = user_input + random_string
                 break
             else:
                 print("\tSave name already taken, please choose another.")
-
+    
     os.mkdir("Characters/"+current_character+"/"+save_name)
 
     for filename in os.listdir(save_path+"/remote/win64_save"):
