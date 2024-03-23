@@ -14,17 +14,11 @@ Requires Python 3
 
 Before installing, I recommend backing up your save file manually just in case something goes wrong.
 
-**Option 1. Download the python file**
+**Option 1. Download ZIP file**
 
-Click on the green `Code` button and choose `Download ZIP`. Unzip this folder at the location you want to store the program (and your saves).
+If you are downloading on Github, Click on the green `Code` button and choose `Download ZIP`. Unzip this folder at the location you want to store the program (and your saves).
 
-In the file explorer, click on the bar above as pictured below:
-
-![image](https://github.com/wiseLlama0/save-manager/assets/114631736/c45a0b8e-33a7-488b-9106-7f8a56b753ed)
-
-Type `cmd` and press enter.
-
-Type `python SaveManager.py`
+In the file explorer, run save-manager.bat
 
 **Option 2. Install with Git**
 
@@ -42,7 +36,7 @@ Type `python SaveManager.py`
 
 When you start the program, follow the setup instructions carefully. When it asks you to select a save folder, select the folder with the name matching the steam game id that contains two files and a folder. It will contain `remote`, another file, and `remotecache.vdf`. 
 
-This file is usually found at `Program Files (x86)/Steam/userdata/{your steam account id}/{game id}`. For example, the game id for Dragon's Dogma 2 is 2054970.
+This file is usually found at `Program Files (x86)/Steam/userdata/{your steam account id}/{game id}`. For example, the game id for Dragon's Dogma 2 is 2054970, so the folder you want is `C:/Program Files (x86)/Steam/userdata/{your steam account id}/2054970`.
 
 Another important note: Remember that any action which deploys new data to the game save folder (loading a save, changing your character, or starting a new character) will permanently delete whatever files are in there. Make sure save them using the Save Game function provided within this tool, or back them up manually yourself. I have done my best to add warnings and a last minute backup save option in all cases that one could accidentally destroy data, however I can make no guarantees that there is perfect coverage.
 
