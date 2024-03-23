@@ -1,9 +1,7 @@
-import configparser
 import os
 import shutil
 import datetime
 import secrets
-import time
 
 import tkinter as tk
 from tkinter import filedialog
