@@ -14,7 +14,7 @@ Before installing, I recommend backing up your save file manually just in case s
 
 **Option 1. Download the python file**
 
-Download the python file. Create an empty folder where you want to store the program (and your saves). Copy the python file into this folder.
+Click on the green `Code` button and choose `Download ZIP`. Unzip this folder at the location you want to store the program (and your saves).
 
 In the file explorer, click on the bar above as pictured below:
 
@@ -24,7 +24,7 @@ Type `cmd` and press enter.
 
 Type `python SaveManager.py`
 
-**Option 2. Install with Git (recommended)**
+**Option 2. Install with Git**
 
 To install with Git, click on the green "Code" button and copy the link https://github.com/wiseLlama0/save-manager.git.
 
@@ -38,7 +38,7 @@ Type `python SaveManager.py`
 
 # How to Use
 
-When you start the program, follow the setup instructions carefully. When it asks you to select a save folder, select the folder that contains three files. It will contain remote, another file, and remotecache.vdf. 
+When you start the program, follow the setup instructions carefully. When it asks you to select a save folder, select the folder with the name matching the steam game id that contains two files and a folder. It will contain `remote`, another file, and `remotecache.vdf`. 
 
 This file is usually found at `Program Files (x86)/Steam/userdata/{your steam account id}/{game id}`. For example, the game id for Dragon's Dogma 2 is 2054970.
 
