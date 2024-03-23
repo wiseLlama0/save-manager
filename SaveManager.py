@@ -10,6 +10,11 @@ from tkinter import filedialog
 save_path = ""
 current_character = ""
 
+def get_file_timestamp(filename):
+    global current_character
+    file_path = "Characters/" + current_character + "/" + filename
+    return os.path.getmtime(file_path)
+
 def promptEnter():
     print("\n\t[ -- Press Enter to continue -- ]")
     input("")
@@ -70,7 +75,7 @@ def stage_save_directory(source_path):
         source_file = os.path.join(source_path, filename)
         destination_file = os.path.join(win_save_path, filename)
         shutil.copyfile(source_file, destination_file)
-        print(f"\Deployed file: {source_file}")
+        print(f"\tDeployed file: {source_file}")
 
 def remove_character_file():
     for item in os.listdir(os.getcwd()):
@@ -237,7 +242,7 @@ def auto_save():
     save_name = "BackupSave"+num_saves
     os.mkdir("Characters/"+current_character+"/"+save_name)
 
-    user_input= input("\n\twould you like to back up your current save? [Y/N]: ")
+    user_input= input("\n\tDo you want to back up your current save? [Y/N]: ")
 
     if (user_input != "Y" and user_input != "y"):
         return
@@ -263,7 +268,7 @@ def save_game():
     if (user_input != "1"):
         return
     
-    user_input = input("\n\tWould you like to name your save? [Y/N]: ")
+    user_input = input("\n\t Would you like to name your save? [Y/N]: ")
 
     save_list = os.listdir("Characters/"+current_character)
     num_saves = len(save_list)
@@ -305,10 +310,14 @@ def load_game():
     print("\t(m). Main Save")
     save_count = 0
     save_list = os.listdir("Characters/"+current_character)
-    for save in save_list:
+    sorted_save_list = sorted(save_list, key=get_file_timestamp, reverse=True)
+    for save in sorted_save_list:
         save_count += 1
-        print(f"\t{save_count}. {save}")
-    print(f"{save_count+1}. Cancel")
+        save_file_path = os.path.join(os.getcwd(), "Characters/"+current_character+"/"+save)
+        timestamp = os.path.getmtime(save_file_path)
+        timestamp_dt_obj = datetime.datetime.fromtimestamp(timestamp)
+        print(f"\t{save_count}. {save}\t\t\t\t |\t{timestamp_dt_obj}")
+    print(f"\t{save_count+1}. Cancel")
     print("================================")
     
     while (True):
@@ -327,7 +336,7 @@ def load_game():
         if (user_input <= 0 or user_input > save_count):
             return
         
-        save_folder = save_list[user_input-1]
+        save_folder = sorted_save_list[user_input-1]
         
         auto_save()
         clear_save_directory()
@@ -390,10 +399,13 @@ def change_character():
 def view_saves():
     os.system("cls")
 
+    save_list = os.listdir("Characters/"+current_character)
+    sorted_save_list = sorted(save_list, key=get_file_timestamp, reverse=True)
+
     print("================================")
     print("Save List:")
     save_count = 0
-    for save in os.listdir("Characters/"+current_character):
+    for save in sorted_save_list:
         save_count += 1
         save_file_path = os.path.join(os.getcwd(), "Characters/"+current_character+"/"+save)
         timestamp = os.path.getmtime(save_file_path)
