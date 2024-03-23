@@ -10,6 +10,8 @@ While I have done my best to test this extensively with my saves, I can make no 
 Requires Python 3
 (Optional: Requires Git)
 
+**THIS PROGRAM WILL NOT WORK IF YOU DO NOT DISABLE STEAM CLOUD FOR YOUR GAME**
+
 Before installing, I recommend backing up your save file manually just in case something goes wrong.
 
 **Option 1. Download the python file**
