@@ -70,7 +70,7 @@ def stage_save_directory(source_path):
         source_file = os.path.join(source_path, filename)
         destination_file = os.path.join(win_save_path, filename)
         shutil.copyfile(source_file, destination_file)
-        print(f"\tStaged file: {source_file}")
+        print(f"\Deployed file: {source_file}")
 
 def remove_character_file():
     for item in os.listdir(os.getcwd()):
@@ -125,6 +125,8 @@ def initialize():
     # Print the selected file path
     print("\tSelected folder:", save_path)
 
+
+    validate_save_path()
 
     character_list = os.listdir(os.path.join(os.getcwd(), "Characters"))
     if (len(character_list) == 0):
@@ -227,22 +229,23 @@ def new_character():
             input("")
 
 def auto_save():
+
+    print("")
     save_list = os.listdir("Characters/"+current_character)
     num_saves = len(save_list)
     num_saves = str(num_saves)
     save_name = "AutoSave"+num_saves
     os.mkdir("Characters/"+current_character+"/"+save_name)
 
+    user_input= input("\n\twould you like to back up your current save? [Y/N]: ")
+
+    if (user_input != "Y" and user_input != "y"):
+        return
+
     for filename in os.listdir(save_path+"/remote/win64_save"):
             source_file = os.path.join(save_path+"/remote/win64_save", filename)
             destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
             shutil.copy(source_file, destination_file)
-
-    for filename in os.listdir(save_path+"/remote/win64_save"):
-            source_file = os.path.join(save_path+"/remote/win64_save", filename)
-            destination_file = os.path.join("Characters/"+current_character+"/main_save", filename)
-            shutil.copy(source_file, destination_file)
-            print(f"\tSaved {source_file}")
 
 def save_game():
 
