@@ -234,7 +234,7 @@ def auto_save():
     save_list = os.listdir("Characters/"+current_character)
     num_saves = len(save_list)
     num_saves = str(num_saves)
-    save_name = "AutoSave"+num_saves
+    save_name = "BackupSave"+num_saves
     os.mkdir("Characters/"+current_character+"/"+save_name)
 
     user_input= input("\n\twould you like to back up your current save? [Y/N]: ")
