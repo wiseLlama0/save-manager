@@ -262,7 +262,7 @@ def auto_save(display_prompt=True):
     if current_save_timestamp == last_backup_timestamp:
         if (display_prompt):
             promptEnter("No changes detected since last backup. Backup aborted.")
-        print("DEBUG: No changes detected since last backup. Backup aborted.")
+        # print("DEBUG: No changes detected since last backup. Backup aborted.")
         return
     elif last_backup_timestamp is None or current_save_timestamp > last_backup_timestamp:
         last_backup_timestamp = current_save_timestamp
@@ -284,7 +284,7 @@ def auto_save(display_prompt=True):
             destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
             shutil.copy(source_file, destination_file)
 
-    print(f"DEBUG: Backup created at {current_save_timestamp}")
+    # print(f"DEBUG: Backup created at {current_save_timestamp}")
 
 def save_game():
 
@@ -543,7 +543,7 @@ def backup_timer(interval):
 
     # Calculate the interval in seconds
     interval_seconds = interval * 60   # Convert interval to seconds
-    interval_seconds = 5 # debug interval
+    # interval_seconds = 5 # debug interval
 
     next_backup_time = time.time() + interval_seconds  # Schedule the first backup
 
