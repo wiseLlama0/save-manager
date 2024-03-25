@@ -250,7 +250,6 @@ def new_character():
 def auto_save(display_prompt=True):
     print("\n\tAuto-saving...")
     global last_backup_timestamp
-    print(f"DEBUG: Last backup timestamp: {last_backup_timestamp}")
 
     if (display_prompt):
         user_input= input("\n\tDo you want to back up your current save? [Y/N]: ")
@@ -261,20 +260,17 @@ def auto_save(display_prompt=True):
     print("\n\tCreating backup...")
     current_save_directory = os.path.join(save_path, 'remote', 'win64_save')
     current_save_timestamp = get_latest_backup_timestamp(current_save_directory)
-    print(f"DEBUG: Current save timestamp: {current_save_timestamp}")
 
     if current_save_timestamp == last_backup_timestamp:
         if (display_prompt):
             promptEnter("No changes detected since last backup. Backup aborted.")
-        print("DEBUG: No changes detected since last backup. Backup aborted.")
+        # print("DEBUG: No changes detected since last backup. Backup aborted.")
         return
     elif last_backup_timestamp is None or current_save_timestamp > last_backup_timestamp:
         last_backup_timestamp = current_save_timestamp
 
     # this will remove any excess backups if the max backups is set
-    print("DEBUG: Managing backups...")
     manage_backups()
-    print("DEBUG: Backups managed.")
     
     random_string = "_"+generate_random_string()
     save_name = "BackupSave" + random_string
@@ -290,7 +286,7 @@ def auto_save(display_prompt=True):
             destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
             shutil.copy(source_file, destination_file)
 
-    print(f"DEBUG: Backup created at {current_save_timestamp}")
+    # print(f"DEBUG: Backup created at {current_save_timestamp}")
 
 def save_game():
 
@@ -548,7 +544,7 @@ def backup_timer(interval):
 
     # Calculate the interval in seconds
     interval_seconds = interval * 60   # Convert interval to seconds
-    interval_seconds = 5 # debug interval
+    # interval_seconds = 5 # debug interval
 
     next_backup_time = time.time() + interval_seconds  # Schedule the first backup
 
@@ -557,9 +553,7 @@ def backup_timer(interval):
         current_time = time.time()
 
         if current_time >= next_backup_time:
-            print("DEBUG: Auto backup triggered.")
             with backup_lock:
-                print("DEBUG: Auto backup lock acquired.")
                 if not backup_active:  # Double-check if the backup is still active
                     break
                 auto_save(display_prompt=False)
