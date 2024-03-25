@@ -17,6 +17,7 @@ backup_active = False # Flag to indicate if the auto backup is active
 backup_lock = threading.Lock() # Define a lock for thread-safe operations, like modifying the backup_active flag
 set_max_backups = False # Flag to indicate if the user has set a maximum number of backups
 max_backups = 100 # Default maximum number of backups
+last_backup_timestamp = None  # Timestamp of the last backup, initialized within the auto_backup function
 
 def generate_random_string():
     random_hex = ''.join(secrets.choice('0123456789abcdef') for _ in range(16))
@@ -247,17 +248,28 @@ def new_character():
             input("")
 
 def auto_save(display_prompt=True):
+    global last_backup_timestamp
 
     if (display_prompt):
         user_input= input("\n\tDo you want to back up your current save? [Y/N]: ")
 
         if (user_input.lower() != "y"):
             return
-    
+        
+    current_save_directory = os.path.join(save_path, 'remote', 'win64_save')
+    current_save_timestamp = get_latest_save_timestamp(current_save_directory)
+
+    if current_save_timestamp == last_backup_timestamp:
+        if (display_prompt):
+            promptEnter("No changes detected since last backup. Backup aborted.")
+        # print("DEBUG: No changes detected since last backup. Backup aborted.")
+        return
+    elif last_backup_timestamp is None or current_save_timestamp > last_backup_timestamp:
+        last_backup_timestamp = current_save_timestamp
+
     # this will remove any excess backups if the max backups is set
     manage_backups()
     
-    print("")
     random_string = "_"+generate_random_string()
     save_name = "BackupSave" + random_string
     try:
@@ -271,6 +283,8 @@ def auto_save(display_prompt=True):
             source_file = os.path.join(save_path+"/remote/win64_save", filename)
             destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
             shutil.copy(source_file, destination_file)
+
+    # print(f"DEBUG: Backup created at {current_save_timestamp}")
 
 def save_game():
 
@@ -321,6 +335,13 @@ def save_game():
 
     promptEnter()
     
+def get_latest_save_timestamp(save_directory):
+    """Get the timestamp of the latest modified file in the save directory."""
+    save_files = os.listdir(save_directory)
+    if not save_files:
+        return None
+    latest_file = max(save_files, key=lambda f: os.path.getmtime(os.path.join(save_directory, f)))
+    return os.path.getmtime(os.path.join(save_directory, latest_file))
 
 def load_game():
 
@@ -437,7 +458,7 @@ def view_saves():
     promptEnter()
 
 def auto_backup():
-    global backup_thread, backup_active, auto_backup_option_text, set_max_backups, max_backups
+    global backup_thread, backup_active, auto_backup_option_text, set_max_backups, max_backups, last_backup_timestamp
 
     os.system("cls")
 
@@ -452,9 +473,12 @@ def auto_backup():
         promptEnter("Auto backup stopped.")
         return
     
+    current_save_directory = os.path.join(save_path, 'remote', 'win64_save')
+    last_backup_timestamp = get_latest_save_timestamp(current_save_directory)
+    
     print("Note: Save Data can be around 10mb per save. 10 saves = 100mb. 100 saves = 1gb.")
     print("Note: Please be aware of the space on your drive.")
-    print("Note: If max backups is enabled, excess backups be culled on next auto backup.")
+    print("Note: If max backups is enabled, excess backups are culled on next auto backup.")
     print("================================")
     print("Auto Backup")
     print("\t\tEnter how often to make backups, in minutes (1-60)")
@@ -514,24 +538,24 @@ def auto_backup():
 
 # used in the auto_backup function
 def backup_timer(interval):
-    global backup_active, auto_backup_alert_text
-    elapsed_time = 0
+    global backup_active
 
     # Calculate the interval in seconds
     interval_seconds = interval * 60   # Convert interval to seconds
     # interval_seconds = 5 # debug interval
 
+    next_backup_time = time.time() + interval_seconds  # Schedule the first backup
+
     while backup_active:
         time.sleep(1)  # Thread sleeps for 1 second intervals to avoid busy-waiting
-        with backup_lock:
-            if not backup_active:  # Check if timer should still be running
-                break
-        
-        elapsed_time += 1
-        if elapsed_time >= interval_seconds:
-            # print(f"Auto backup created at {datetime.datetime.now()}") # Debug print statement
-            auto_save(display_prompt=False)
-            elapsed_time = 0  # Reset elapsed time after performing a backup
+        current_time = time.time()
+
+        if current_time >= next_backup_time:
+            with backup_lock:
+                if not backup_active:  # Double-check if the backup is still active
+                    break
+                auto_save(display_prompt=False)
+                next_backup_time = time.time() + interval_seconds
 
 def manage_backups():
     if not set_max_backups:
@@ -540,18 +564,12 @@ def manage_backups():
     backup_dir = os.path.join("Characters", current_character)
     backups = [d for d in os.listdir(backup_dir) if d.startswith('BackupSave')]
     backups.sort(key=lambda x: os.path.getmtime(os.path.join(backup_dir, x)))
-    
-    # print(f"Current backups ({len(backups)}): {backups}")  # Debug print
 
     while len(backups) > (max_backups - 1):
         oldest_backup = backups.pop(0)
         path_to_delete = os.path.join(backup_dir, oldest_backup)
-        # print(f"Deleting {path_to_delete}...")  # Debug print
         shutil.rmtree(path_to_delete)
-
-    # print(f"Backups after deletion ({len(backups)}): {backups}")  # Debug print
-
-
+        # print(f"Deleted old backup: {oldest_backup}")
 
 
 def run():
