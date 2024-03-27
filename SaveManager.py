@@ -19,6 +19,8 @@ set_max_backups = False # Flag to indicate if the user has set a maximum number 
 max_backups = 100 # Default maximum number of backups
 last_backup_timestamp = None  # Timestamp of the last backup, initialized within the auto_backup function
 
+save_lock = threading.Lock()
+
 def generate_random_string():
     random_hex = ''.join(secrets.choice('0123456789abcdef') for _ in range(16))
     return random_hex
@@ -62,22 +64,25 @@ def validate_save_path():
 def clear_save_directory():
     global save_path
     
-    #clearing save directory
-    print("\n\tClearing save directory...")
+    #disable clearing save directory while another thread is saving data
+    with save_lock:
 
-    #validate save path
-    validate_save_path()
+        #clearing save directory
+        print("\n\tClearing save directory...")
 
-    count = 0
-    for filename in os.listdir(save_path+"/remote/win64_save"):
-        if (count > 3):
-            error_path = save_path+"/remote/win64_save"
-            print(f"WARNING: Abnormal file structure dectected while deleting from {error_path}. Aborting now.")
-            quit()
-        file_path = os.path.join(save_path+"/remote/win64_save", filename)
-        os.remove(file_path)
-        print(f"\tDeleted: {file_path}")
-        count += 1
+        #validate save path
+        validate_save_path()
+
+        count = 0
+        for filename in os.listdir(save_path+"/remote/win64_save"):
+            if (count > 3):
+                error_path = save_path+"/remote/win64_save"
+                print(f"WARNING: Abnormal file structure dectected while deleting from {error_path}. Aborting now.")
+                quit()
+            file_path = os.path.join(save_path+"/remote/win64_save", filename)
+            os.remove(file_path)
+            print(f"\tDeleted: {file_path}")
+            count += 1
 
 def stage_save_directory(source_path):
     global save_path
@@ -247,42 +252,38 @@ def new_character():
             print("\n\t[ -- Press Enter to continue -- ]")
             input("")
 
+
 def auto_save(display_prompt=True):
     global last_backup_timestamp
 
-    if (display_prompt):
-        user_input= input("\n\tDo you want to back up your current save? [Y/N]: ")
-
-        if (user_input.lower() != "y"):
-            return
-        
-    current_save_directory = os.path.join(save_path, 'remote', 'win64_save')
-    current_save_timestamp = get_latest_save_timestamp(current_save_directory)
-
-    if current_save_timestamp == last_backup_timestamp:
+    with save_lock:
         if (display_prompt):
-            promptEnter("No changes detected since last backup. Backup aborted.")
-        # print("DEBUG: No changes detected since last backup. Backup aborted.")
-        return
-    elif last_backup_timestamp is None or current_save_timestamp > last_backup_timestamp:
+            user_input= input("\n\tDo you want to back up your current save? [Y/N]: ")
+
+            if (user_input.lower() != "y"):
+                return
+            
+        current_save_directory = os.path.join(save_path, 'remote', 'win64_save')
+        current_save_timestamp = get_latest_save_timestamp(current_save_directory)
+
         last_backup_timestamp = current_save_timestamp
 
-    # this will remove any excess backups if the max backups is set
-    manage_backups()
-    
-    random_string = "_"+generate_random_string()
-    save_name = "BackupSave" + random_string
-    try:
-        os.mkdir("Characters/"+current_character+"/"+save_name)
-    except FileExistsError:
-        if (display_prompt):
-            promptEnter(f"The directory {save_name} already exists. Backup aborted.")
-        return
+        # this will remove any excess backups if the max backups is set
+        manage_backups()
+        
+        random_string = "_"+generate_random_string()
+        save_name = "BackupSave" + random_string
+        try:
+            os.mkdir("Characters/"+current_character+"/"+save_name)
+        except FileExistsError:
+            if (display_prompt):
+                promptEnter(f"The directory {save_name} already exists. Backup aborted.")
+            return
 
-    for filename in os.listdir(save_path+"/remote/win64_save"):
-            source_file = os.path.join(save_path+"/remote/win64_save", filename)
-            destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
-            shutil.copy(source_file, destination_file)
+        for filename in os.listdir(save_path+"/remote/win64_save"):
+                source_file = os.path.join(save_path+"/remote/win64_save", filename)
+                destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
+                shutil.copy(source_file, destination_file)
 
     # print(f"DEBUG: Backup created at {current_save_timestamp}")
 
@@ -552,6 +553,7 @@ def backup_timer(interval):
         current_time = time.time()
 
         if current_time >= next_backup_time:
+            print("starting auto backup")
             # print("DEBUG: start lock 1 at backup_timer()")
             with backup_lock:
                 if not backup_active:  # Double-check if the backup is still active
