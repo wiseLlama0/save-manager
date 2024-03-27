@@ -265,8 +265,16 @@ def auto_save(display_prompt=True):
             
         current_save_directory = os.path.join(save_path, 'remote', 'win64_save')
         current_save_timestamp = get_latest_save_timestamp(current_save_directory)
+        # log current and last backup timestamps for debugging
+        # print(f"DEBUG: Current save timestamp is {current_save_timestamp}")
+        # print(f"DEBUG: Last backup timestamp is {last_backup_timestamp}")
 
-        last_backup_timestamp = current_save_timestamp
+        if current_save_timestamp == last_backup_timestamp:
+            if (not display_prompt):
+                print("Save file is already backed up. Backup aborted.") # debug
+                return
+        elif last_backup_timestamp is None or current_save_timestamp > last_backup_timestamp:
+            last_backup_timestamp = current_save_timestamp
 
         # this will remove any excess backups if the max backups is set
         manage_backups()
@@ -285,7 +293,7 @@ def auto_save(display_prompt=True):
                 destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
                 shutil.copy(source_file, destination_file)
 
-    # print(f"DEBUG: Backup created at {current_save_timestamp}")
+        # print(f"DEBUG: Backup created at {current_save_timestamp}")
 
 def save_game():
 
@@ -553,7 +561,7 @@ def backup_timer(interval):
         current_time = time.time()
 
         if current_time >= next_backup_time:
-            print("starting auto backup")
+            # print("starting auto backup") #debug
             # print("DEBUG: start lock 1 at backup_timer()")
             with backup_lock:
                 if not backup_active:  # Double-check if the backup is still active
