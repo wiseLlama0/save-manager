@@ -41,7 +41,7 @@ def validate_save_path():
     if (len(os.listdir(save_path))) == 0:
         return()
 
-    if (len(os.listdir(save_path))) == 3 or (len(os.listdir(save_path))) == 5:
+    if (len(os.listdir(save_path))) != 3 or (len(os.listdir(save_path))) != 4:
         print(f"os list dir {os.listdir(save_path)}")
         print("\n\tWARNING: Error validating save directory. Unexpected file structure for save folder.\n\t\t Please ensure that you have selected the correct directory. File removal is permanent and unrecoverable.")
         quit()
@@ -51,16 +51,16 @@ def validate_save_path():
     for item in os.listdir(save_path):
         if (item == "remote"):
             remote_folder = True
-        # elif (item == "remotecache.vdf"):
-        #     remote_vdf = True
+        elif (item == "remotecache.vdf"):
+            remote_vdf = True
     
     if (remote_folder == False):
         print("\n\tWARNING: Error validating save directory. Could not find remote folder.\n\t\t  Please ensure that you have selected the correct directory. File removal is permanent and unrecoverable.")
         quit()
 
-    # if (remote_vdf == False):
-    #     print("\n\tWARNING: Error validating save directory. Could not find remotecache.vdf.\n\t\t  Please ensure that you have selected the correct directory. File removal is permanent and unrecoverable.")
-    #     quit()
+    if (remote_vdf == False):
+        print("\n\tWARNING: Error validating save directory. Could not find remotecache.vdf.\n\t\t  Please ensure that you have selected the correct directory. File removal is permanent and unrecoverable.")
+        quit()
 
 def clear_save_directory():
     global save_path
