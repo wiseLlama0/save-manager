@@ -74,29 +74,18 @@ def clear_save_directory():
         #validate save path
         validate_save_path()
 
-        # stop deleting files after this many loops
-        files_to_delete = 3
-
         # ask the user if the want to delete their character creator data or not
         user_input = input("\n\tDo you want to delete your character creator data? [Y/N]: ")
-
-        # if the user wants to delete their character creator data, delete all files
-        if user_input.lower() == "y":
-            files_to_delete = 5
-
-        counter = 0
         try:
-            for filename in os.listdir(save_path+"/remote/win64_save"):
-                if (counter > files_to_delete):
-                    break
-                file_path = os.path.join(save_path+"/remote/win64_save", filename)
-                os.remove(file_path)
-                print(f"\tDeleted: {file_path}")
-                counter += 1
+            for filename in os.listdir(save_path + "/remote/win64_save"):
+                # Determine the file prefix based on user input
+                if user_input.lower() == "y" or filename.startswith("data"):
+                    file_path = os.path.join(save_path + "/remote/win64_save", filename)
+                    os.remove(file_path)
+                    print(f"\tDeleted: {file_path}")
         except FileNotFoundError:
-            error_path = save_path+"/remote/win64_save"
-            print(f"WARNING: Abnormal file structure detected while deleting from {error_path}. Aborting now.")
-            quit()
+            error_path = save_path + "/remote/win64_save"
+            print(f"WARNING: File not found or abnormal file structure detected while deleting from {error_path}.")
 
 def stage_save_directory(source_path):
     global save_path
