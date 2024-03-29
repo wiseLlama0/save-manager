@@ -41,7 +41,7 @@ def validate_save_path():
     if (len(os.listdir(save_path))) == 0:
         return()
 
-    if (len(os.listdir(save_path))) != 3 or (len(os.listdir(save_path))) != 5:
+    if (len(os.listdir(save_path))) == 3 or (len(os.listdir(save_path))) == 5:
         print(f"os list dir {os.listdir(save_path)}")
         print("\n\tWARNING: Error validating save directory. Unexpected file structure for save folder.\n\t\t Please ensure that you have selected the correct directory. File removal is permanent and unrecoverable.")
         quit()
@@ -74,16 +74,29 @@ def clear_save_directory():
         #validate save path
         validate_save_path()
 
-        count = 0
-        for filename in os.listdir(save_path+"/remote/win64_save"):
-            if (count > 3):
-                error_path = save_path+"/remote/win64_save"
-                print(f"WARNING: Abnormal file structure dectected while deleting from {error_path}. Aborting now.")
-                quit()
-            file_path = os.path.join(save_path+"/remote/win64_save", filename)
-            os.remove(file_path)
-            print(f"\tDeleted: {file_path}")
-            count += 1
+        # stop deleting files after this many loops
+        files_to_delete = 3
+
+        # ask the user if the want to delete their character creator data or not
+        user_input = input("\n\tDo you want to delete your character creator data? [Y/N]: ")
+
+        # if the user wants to delete their character creator data, delete all files
+        if user_input.lower() == "y":
+            files_to_delete = 5
+
+        counter = 0
+        try:
+            for filename in os.listdir(save_path+"/remote/win64_save"):
+                if (counter > files_to_delete):
+                    break
+                file_path = os.path.join(save_path+"/remote/win64_save", filename)
+                os.remove(file_path)
+                print(f"\tDeleted: {file_path}")
+                counter += 1
+        except FileNotFoundError:
+            error_path = save_path+"/remote/win64_save"
+            print(f"WARNING: Abnormal file structure detected while deleting from {error_path}. Aborting now.")
+            quit()
 
 def stage_save_directory(source_path):
     global save_path
