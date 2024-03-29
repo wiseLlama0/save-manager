@@ -41,7 +41,7 @@ def validate_save_path():
     if (len(os.listdir(save_path))) == 0:
         return()
 
-    if (len(os.listdir(save_path))) != 3:
+    if (len(os.listdir(save_path))) != 3 and (len(os.listdir(save_path))) != 4:
         print("\n\tWARNING: Error validating save directory. Unexpected file structure for save folder.\n\t\t Please ensure that you have selected the correct directory. File removal is permanent and unrecoverable.")
         quit()
 
