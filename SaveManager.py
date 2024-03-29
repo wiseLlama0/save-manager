@@ -73,16 +73,18 @@ def clear_save_directory():
         #validate save path
         validate_save_path()
 
-        count = 0
-        for filename in os.listdir(save_path+"/remote/win64_save"):
-            if (count > 3):
-                error_path = save_path+"/remote/win64_save"
-                print(f"WARNING: Abnormal file structure dectected while deleting from {error_path}. Aborting now.")
-                quit()
-            file_path = os.path.join(save_path+"/remote/win64_save", filename)
-            os.remove(file_path)
-            print(f"\tDeleted: {file_path}")
-            count += 1
+        # ask the user if the want to delete their character creator data or not
+        user_input = input("\n\tDo you want to delete your character creator data? [Y/N]: ")
+        try:
+            for filename in os.listdir(save_path + "/remote/win64_save"):
+                # Determine the file prefix based on user input
+                if user_input.lower() == "y" or filename.startswith("data"):
+                    file_path = os.path.join(save_path + "/remote/win64_save", filename)
+                    os.remove(file_path)
+                    print(f"\tDeleted: {file_path}")
+        except FileNotFoundError:
+            error_path = save_path + "/remote/win64_save"
+            print(f"WARNING: File not found or abnormal file structure detected while deleting from {error_path}.")
 
 def stage_save_directory(source_path):
     global save_path
@@ -271,7 +273,7 @@ def auto_save(display_prompt=True):
 
         if current_save_timestamp == last_backup_timestamp:
             if (not display_prompt):
-                print("Save file is already backed up. Backup aborted.") # debug
+                # print("Save file is already backed up. Backup aborted.") # debug
                 return
         elif last_backup_timestamp is None or current_save_timestamp > last_backup_timestamp:
             last_backup_timestamp = current_save_timestamp
