@@ -21,6 +21,20 @@ last_backup_timestamp = None  # Timestamp of the last backup, initialized within
 
 save_lock = threading.Lock()
 
+def deploy_creation_files():
+    global save_path
+
+    win_save_path = save_path+"/remote/win64_save"
+    current_directory = os.getcwd()
+    creations_folder = os.path.join(current_directory, "Creations")
+
+    print("")
+    for filename in os.listdir(creations_folder):
+        source_file = os.path.join(creations_folder, filename)
+        destination_file = os.path.join(win_save_path, filename)
+        shutil.copyfile(source_file, destination_file)
+        print(f"\tDeployed file: {source_file}")
+
 def generate_random_string():
     random_hex = ''.join(secrets.choice('0123456789abcdef') for _ in range(16))
     return random_hex
@@ -75,7 +89,7 @@ def clear_save_directory():
 
         count = 0
         for filename in os.listdir(save_path+"/remote/win64_save"):
-            if (count > 3):
+            if (count > 10):
                 error_path = save_path+"/remote/win64_save"
                 print(f"WARNING: Abnormal file structure dectected while deleting from {error_path}. Aborting now.")
                 quit()
@@ -107,6 +121,18 @@ def create_file(file_path):
     with open(file_path, 'w'):
         pass
 
+def save_creation_files():
+    global save_path
+    win_save_path = save_path+"/remote/win64_save"
+    current_directory = os.getcwd()
+    creations_folder = os.path.join(current_directory, "Creations")
+
+    for filename in os.listdir(win_save_path):
+        if (filename.startswith("SS1")):
+            source_file = os.path.join(win_save_path, filename)
+            destination_file = os.path.join(creations_folder, filename)
+            shutil.copyfile(source_file, destination_file)
+
 def initialize():
 
     global save_path
@@ -132,6 +158,11 @@ def initialize():
     if (os.path.exists(character_folder) == False):
         os.mkdir("Characters")
 
+    creations_folder = os.path.join(current_directory, "Creations")
+
+    if (os.path.exists(creations_folder) == False):
+        os.mkdir("Creations")
+
     print("\n\tPlease select your save folder. This folder usually has a path similar\n\tto Steam/userdata/{some number}/{game id}")
 
     print("\n\t [ -- Press Enter to continue to folder selection -- ]")
@@ -149,7 +180,6 @@ def initialize():
     # Print the selected file path
     print("\tSelected folder:", save_path)
 
-
     validate_save_path()
 
     character_list = os.listdir(os.path.join(os.getcwd(), "Characters"))
@@ -162,7 +192,7 @@ def initialize():
         
         os.mkdir("Characters/"+folder_name+"/main_save")
 
-        if (len(os.listdir(save_path+"/remote/win64_save")) == 0):
+        if (len(os.listdir(save_path+"/remote/win64_save")) == 0 or len(os.listdir(save_path+"/remote/win64_save")) == 2):
             print("WARNING: Error importing current character. No save data found. Please start the game to generate save data.")
             quit()
 
@@ -202,6 +232,11 @@ def initialize():
             
             current_character = character_list[user_input-1]
             create_file(current_character + ".character")
+
+    creations_list = os.listdir(os.path.join(os.getcwd(), "Creations"))
+    if (len(creations_list) == 0 ):
+        save_creation_files()
+        print("\n\tSaved Creation files")
 
     run()
 
@@ -243,6 +278,8 @@ def new_character():
 
             remove_character_file()
             create_file(current_character+".character")
+
+            deploy_creation_files()
 
             promptEnter()
 
