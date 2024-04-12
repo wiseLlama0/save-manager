@@ -41,7 +41,7 @@ def generate_random_string():
 
 def get_file_timestamp(filename):
     global current_character
-    file_path = "Characters/" + current_character + "/" + filename
+    file_path = os.path.join("Characters", current_character, filename)
     return os.path.getmtime(file_path)
 
 def promptEnter(extra_message=""):
@@ -88,12 +88,12 @@ def clear_save_directory():
         validate_save_path()
 
         count = 0
-        for filename in os.listdir(save_path+"/remote/win64_save"):
+        for filename in os.listdir(os.path.join(save_path, "remote", "win64_save")):
             if (count > 10):
-                error_path = save_path+"/remote/win64_save"
+                error_path = os.path.join(save_path, "remote", "win64_save")
                 print(f"WARNING: Abnormal file structure dectected while deleting from {error_path}. Aborting now.")
                 quit()
-            file_path = os.path.join(save_path+"/remote/win64_save", filename)
+            file_path = os.path.join(save_path, "remote", "win64_save", filename)
             os.remove(file_path)
             print(f"\tDeleted: {file_path}")
             count += 1
@@ -101,7 +101,7 @@ def clear_save_directory():
 def stage_save_directory(source_path):
     global save_path
 
-    win_save_path = save_path+"/remote/win64_save"
+    win_save_path = os.path.join(save_path, "remote", "win64_save")
 
     print("")
     for filename in os.listdir(source_path):
@@ -187,18 +187,18 @@ def initialize():
         print("\n\tNo saved characters detected. Importing current character...")
         folder_name = input("\tPlease name the folder for the imported character: ")
 
-        os.mkdir("Characters/"+folder_name)
+        os.mkdir(os.path.join("Characters", folder_name))
         print(f"\n\tCharacter {folder_name} successfully created.\n")
         
-        os.mkdir("Characters/"+folder_name+"/main_save")
+        os.mkdir(os.path.join("Characters", folder_name, "main_save"))
 
-        if (len(os.listdir(save_path+"/remote/win64_save")) == 0 or len(os.listdir(save_path+"/remote/win64_save")) == 2):
+        if (len(os.listdir(os.path.join(save_path, "remote", "win64_save"))) == 0) or (len(os.listdir(os.path.join(save_path, "remote", "win64_save"))) == 2):
             print("WARNING: Error importing current character. No save data found. Please start the game to generate save data.")
             quit()
 
-        for filename in os.listdir(save_path+"/remote/win64_save"):
-            source_file = os.path.join(save_path+"/remote/win64_save", filename)
-            destination_file = os.path.join("Characters/"+folder_name+"/main_save", filename)
+        for filename in os.listdir(os.path.join(save_path, "remote", "win64_save")):
+            source_file = os.path.join(save_path, "remote", "win64_save", filename)
+            destination_file = os.path.join("Characters", folder_name, "main_save", filename)
             shutil.copy(source_file, destination_file)
             print(f"\tImported {source_file}")
 
@@ -262,17 +262,17 @@ def new_character():
         print("Create a New Character")
 
         folder_name = input("\tChoose a name: ")
-        new_folder_directory = os.path.join(os.getcwd(), "Characters/"+folder_name)
+        new_folder_directory = os.path.join(os.getcwd(), "Characters", folder_name)
         if (os.path.exists(new_folder_directory) == False):
             
             clear_save_directory()
 
             print("\n\tCreating new character folder...")
 
-            os.mkdir("Characters/"+folder_name)
+            os.mkdir(os.path.join("Characters", folder_name))
             print(f"\n\tCharacter {folder_name} successfully created.\n")
             
-            os.mkdir("Characters/"+folder_name+"/main_save")
+            os.mkdir(os.path.join("Characters", folder_name, "main_save"))
 
             current_character = folder_name
 
@@ -319,16 +319,16 @@ def auto_save(display_prompt=True):
         random_string = "_"+generate_random_string()
         save_name = "BackupSave" + random_string
         try:
-            os.mkdir("Characters/"+current_character+"/"+save_name)
+            os.mkdir(os.path.join("Characters", current_character, save_name))
         except FileExistsError:
             if (display_prompt):
                 promptEnter(f"The directory {save_name} already exists. Backup aborted.")
             return
 
-        for filename in os.listdir(save_path+"/remote/win64_save"):
-                source_file = os.path.join(save_path+"/remote/win64_save", filename)
-                destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
-                shutil.copy(source_file, destination_file)
+        for filename in os.listdir(os.path.join(save_path, "remote",  "win64_save")):
+            source_file = os.path.join(save_path, "remote", "win64_save", filename)
+            destination_file = os.path.join("Characters", current_character, save_name, filename)
+            shutil.copy(source_file, destination_file)
 
         # print(f"DEBUG: Backup created at {current_save_timestamp}")
 
@@ -350,7 +350,7 @@ def save_game():
     
     user_input = input("\n\t Would you like to name your save? [Y/N]: ")
 
-    save_list = os.listdir("Characters/"+current_character)
+    save_list = os.listdir(os.path.join("Characters", current_character))
     num_saves = len(save_list)
     num_saves = str(num_saves)
     save_name = "Save"+num_saves
@@ -360,24 +360,24 @@ def save_game():
         while (True):
             user_input = input("\n\tEnter a name for your save: ")
 
-            if (os.path.exists("Characters/"+current_character+"/"+user_input+random_string) == False):
+            if (os.path.exists(os.path.join("Characters", current_character, user_input + random_string)) == False):
                 save_name = user_input + random_string
                 break
             else:
                 print("\tSave name already taken, please choose another.")
     
-    os.mkdir("Characters/"+current_character+"/"+save_name)
+    os.mkdir(os.path.join("Characters", current_character, save_name))
 
-    for filename in os.listdir(save_path+"/remote/win64_save"):
-            source_file = os.path.join(save_path+"/remote/win64_save", filename)
-            destination_file = os.path.join("Characters/"+current_character+"/"+save_name, filename)
-            shutil.copy(source_file, destination_file)
+    for filename in os.listdir(os.path.join(save_path, "remote", "win64_save")):
+        source_file = os.path.join(save_path, "remote", "win64_save", filename)
+        destination_file = os.path.join("Characters", current_character, save_name, filename)
+        shutil.copy(source_file, destination_file)
 
-    for filename in os.listdir(save_path+"/remote/win64_save"):
-            source_file = os.path.join(save_path+"/remote/win64_save", filename)
-            destination_file = os.path.join("Characters/"+current_character+"/main_save", filename)
-            shutil.copy(source_file, destination_file)
-            print(f"\tSaved {source_file}")
+    for filename in os.listdir(os.path.join(save_path, "remote", "win64_save")):
+        source_file = os.path.join(save_path, "remote", "win64_save", filename)
+        destination_file = os.path.join("Characters", current_character, "main_save", filename)
+        shutil.copy(source_file, destination_file)
+        print(f"\tSaved {source_file}")
 
     promptEnter()
     
@@ -397,11 +397,11 @@ def load_game():
     print("Load Game")
     print("\t(m). Main Save")
     save_count = 0
-    save_list = os.listdir("Characters/"+current_character)
+    save_list = os.listdir(os.path.join("Characters", current_character))
     sorted_save_list = sorted(save_list, key=get_file_timestamp, reverse=True)
     for save in sorted_save_list:
         save_count += 1
-        save_file_path = os.path.join(os.getcwd(), "Characters/"+current_character+"/"+save)
+        save_file_path = os.path.join(os.getcwd(), "Characters", current_character, save)
         timestamp = os.path.getmtime(save_file_path)
         timestamp_dt_obj = datetime.datetime.fromtimestamp(timestamp)
         print(f"\t{save_count}. {save}\t\t\t\t |\t{timestamp_dt_obj}")
@@ -415,7 +415,7 @@ def load_game():
             # main save
             auto_save()
             clear_save_directory()
-            stage_save_directory("Characters/"+current_character+"/main_save")
+            stage_save_directory(os.path.join("Characters", current_character, "main_save"))
             promptEnter()
             return
         
@@ -428,7 +428,7 @@ def load_game():
         
         auto_save()
         clear_save_directory()
-        stage_save_directory("Characters/"+current_character+"/"+save_folder)
+        stage_save_directory(os.path.join("Characters", current_character, save_folder))
         break
 
     promptEnter()
@@ -480,14 +480,14 @@ def change_character():
 
     clear_save_directory()
     
-    stage_save_directory(character_dir+"\main_save")
+    stage_save_directory(os.path.join(character_dir, "main_save"))
 
     promptEnter()
 
 def view_saves():
     os.system("cls")
 
-    save_list = os.listdir("Characters/"+current_character)
+    save_list = os.listdir(os.path.join("Characters", current_character))
     sorted_save_list = sorted(save_list, key=get_file_timestamp, reverse=True)
 
     print("================================")
@@ -495,7 +495,7 @@ def view_saves():
     save_count = 0
     for save in sorted_save_list:
         save_count += 1
-        save_file_path = os.path.join(os.getcwd(), "Characters/"+current_character+"/"+save)
+        save_file_path = os.path.join(os.getcwd(), "Characters", current_character, save)
         timestamp = os.path.getmtime(save_file_path)
         timestamp_dt_obj = datetime.datetime.fromtimestamp(timestamp)
         print(f"\t{save_count}. {save}\t\t\t\t |\t{timestamp_dt_obj}")
